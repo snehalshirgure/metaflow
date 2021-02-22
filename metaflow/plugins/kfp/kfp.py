@@ -32,7 +32,7 @@ from ...debug import debug
 from ...environment import MetaflowEnvironment
 from ...graph import DAGNode
 from ...plugins.resources_decorator import ResourcesDecorator
-from .kfp_pod_decorator import (PodAnnotationDecorator, PodLabelDecorator)
+from .kfp_pod_decorator import PodAnnotationDecorator, PodLabelDecorator
 
 
 class KfpComponent(object):
@@ -282,7 +282,9 @@ class KubeflowPipelines(object):
             elif isinstance(deco, PodAnnotationDecorator):
                 if "annotations" not in pod_spec:
                     pod_spec = dict()
-                pod_spec["annotations"][deco.attributes["name"]] = deco.attributes["value"]
+                pod_spec["annotations"][deco.attributes["name"]] = deco.attributes[
+                    "value"
+                ]
 
         return pod_spec
 
@@ -466,9 +468,7 @@ class KubeflowPipelines(object):
         if "memory" in pod_spec:
             container_op.container.set_memory_request(pod_spec["memory"])
         if "memory_limit" in pod_spec:
-            container_op.container.set_memory_limit(
-                pod_spec["memory_limit"]
-            )
+            container_op.container.set_memory_limit(pod_spec["memory_limit"])
         if "cpu" in pod_spec:
             container_op.container.set_cpu_request(pod_spec["cpu"])
         if "cpu_limit" in pod_spec:
