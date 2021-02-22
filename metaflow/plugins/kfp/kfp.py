@@ -281,7 +281,7 @@ class KubeflowPipelines(object):
                 pod_spec["labels"][deco.attributes["name"]] = deco.attributes["value"]
             elif isinstance(deco, PodAnnotationDecorator):
                 if "annotations" not in pod_spec:
-                    pod_spec = dict()
+                    pod_spec["annotations"] = dict()
                 pod_spec["annotations"][deco.attributes["name"]] = deco.attributes[
                     "value"
                 ]
