@@ -243,17 +243,20 @@ class KubeflowPipelines(object):
     def _get_pod_customization(node: DAGNode) -> Dict[str, str]:
         """
         Get resource request or limit for a Metaflow step (node) set by @resources decorator.
+        Get pod labels and annotations from @pod_label and @pod_annotation decorators
 
+        For resources:
         Supported parameters: 'cpu', 'cpu_limit', 'gpu', 'gpu_vendor', 'memory', 'memory_limit'
         Keys with no suffix set resource request (minimum);
         keys with 'limit' suffix sets resource limit (maximum).
-
         Eventually resource request and limits link back to kubernetes, see
         https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-
         Default unit for memory is megabyte, aligning with existing resource decorator usage.
 
-        Example using resource decorator:
+        Example usage handled by this function:
+            @pod_label(name="namespace", value="aip_kfp_example")
+            @pod_label(name="team", value="aip")
+            @pod_annotation(name="description", value="KFP pipeline from Metaflow")
             @resource(cpu=0.5, cpu_limit=2, gpu=1, memory=300)
             @step
             def my_kfp_step(): ...
