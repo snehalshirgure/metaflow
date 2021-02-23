@@ -281,13 +281,15 @@ class KubeflowPipelines(object):
             elif isinstance(deco, PodLabelDecorator):
                 if "labels" not in container_attrs:
                     container_attrs["labels"] = dict()
-                container_attrs["labels"][deco.attributes["key"]] = deco.attributes["value"]
+                container_attrs["labels"][deco.attributes["key"]] = deco.attributes[
+                    "value"
+                ]
             elif isinstance(deco, PodAnnotationDecorator):
                 if "annotations" not in container_attrs:
                     container_attrs["annotations"] = dict()
-                container_attrs["annotations"][deco.attributes["key"]] = deco.attributes[
-                    "value"
-                ]
+                container_attrs["annotations"][
+                    deco.attributes["key"]
+                ] = deco.attributes["value"]
 
         return container_attrs
 

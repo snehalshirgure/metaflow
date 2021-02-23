@@ -4,7 +4,7 @@ from metaflow.decorators import StepDecorator
 class PodAnnotationDecorator(StepDecorator):
     """
     Add a single pod annotation. This decorator can be used multiple time per step.
-    Repeated adding assigning value under same name will overwrite previous value.
+    Repeatedly assigning value under same key will overwrite previous value.
     """
 
     name = "pod_annotation"
@@ -17,7 +17,7 @@ class PodAnnotationDecorator(StepDecorator):
 class PodLabelDecorator(StepDecorator):
     """
     Add a single pod label. This decorator can be used multiple time per step.
-    Repeated adding assigning value under same name will overwrite previous value.
+    Repeatedly assigning value under same key will overwrite previous value.
     """
 
     name = "pod_label"
