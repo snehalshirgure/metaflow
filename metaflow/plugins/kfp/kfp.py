@@ -485,10 +485,10 @@ class KubeflowPipelines(object):
             )
         if "annotations" in pod_spec:
             for name, value in pod_spec["annotations"].items():
-                container_op.container.add_pod_annotation(name, value)
+                container_op.add_pod_annotation(name, value)
         if "labels" in pod_spec:
             for name, value in pod_spec["labels"].items():
-                container_op.container.add_pod_label(name, value)
+                container_op.add_pod_label(name, value)
 
     def step_op(
         self,
