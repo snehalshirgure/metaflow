@@ -9,7 +9,7 @@ class PodAnnotationDecorator(StepDecorator):
 
     name = "pod_annotation"
     defaults = {
-        "name": None,
+        "key": None,
         "value": None,
     }
 
@@ -22,6 +22,6 @@ class PodLabelDecorator(StepDecorator):
 
     name = "pod_label"
     defaults = {
-        "name": None,
+        "key": None,
         "value": None,
     }

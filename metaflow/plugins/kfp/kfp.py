@@ -41,14 +41,14 @@ class KfpComponent(object):
         name: str,
         cmd_template: str,
         total_retries: int,
-        pod_spec: Dict[str, str],
+        container_attrs: Dict[str, str],
         kfp_decorator: KfpInternalDecorator,
         pytorch_distributed_decorator: PyTorchDistributedDecorator,
     ):
         self.name = name
         self.cmd_template = cmd_template
         self.total_retries = total_retries
-        self.pod_spec = pod_spec
+        self.container_attrs = container_attrs
         self.kfp_decorator = kfp_decorator
         self.preceding_kfp_func: Callable = (
             kfp_decorator.attributes.get("preceding_component", None)
@@ -270,26 +270,26 @@ class KubeflowPipelines(object):
                 value = f"{value}M"
             return value
 
-        pod_spec = {}
+        container_attrs = {}
         for deco in node.decorators:
             if isinstance(deco, ResourcesDecorator):
                 for attr_key, attr_value in deco.attributes.items():
                     if attr_value is not None:
-                        pod_spec[attr_key] = to_k8s_resource_format(
+                        container_attrs[attr_key] = to_k8s_resource_format(
                             attr_key, attr_value
                         )
             elif isinstance(deco, PodLabelDecorator):
-                if "labels" not in pod_spec:
-                    pod_spec["labels"] = dict()
-                pod_spec["labels"][deco.attributes["name"]] = deco.attributes["value"]
+                if "labels" not in container_attrs:
+                    container_attrs["labels"] = dict()
+                container_attrs["labels"][deco.attributes["key"]] = deco.attributes["value"]
             elif isinstance(deco, PodAnnotationDecorator):
-                if "annotations" not in pod_spec:
-                    pod_spec["annotations"] = dict()
-                pod_spec["annotations"][deco.attributes["name"]] = deco.attributes[
+                if "annotations" not in container_attrs:
+                    container_attrs["annotations"] = dict()
+                container_attrs["annotations"][deco.attributes["key"]] = deco.attributes[
                     "value"
                 ]
 
-        return pod_spec
+        return container_attrs
 
     def create_kfp_components_from_graph(self) -> Dict[str, KfpComponent]:
         """
@@ -318,7 +318,7 @@ class KubeflowPipelines(object):
                     [step_cli],
                 ),
                 total_retries=total_retries,
-                pod_spec=self._get_pod_customization(node),
+                container_attrs=self._get_pod_customization(node),
                 kfp_decorator=next(
                     (
                         deco
@@ -467,27 +467,27 @@ class KubeflowPipelines(object):
 
     @staticmethod
     def _set_container_settings(container_op: ContainerOp, kfp_component: KfpComponent):
-        pod_spec: Dict[str, str] = kfp_component.pod_spec
-        if "memory" in pod_spec:
-            container_op.container.set_memory_request(pod_spec["memory"])
-        if "memory_limit" in pod_spec:
-            container_op.container.set_memory_limit(pod_spec["memory_limit"])
-        if "cpu" in pod_spec:
-            container_op.container.set_cpu_request(pod_spec["cpu"])
-        if "cpu_limit" in pod_spec:
-            container_op.container.set_cpu_limit(pod_spec["cpu_limit"])
-        if "gpu" in pod_spec:
+        container_attrs: Dict[str, str] = kfp_component.container_attrs
+        if "memory" in container_attrs:
+            container_op.container.set_memory_request(container_attrs["memory"])
+        if "memory_limit" in container_attrs:
+            container_op.container.set_memory_limit(container_attrs["memory_limit"])
+        if "cpu" in container_attrs:
+            container_op.container.set_cpu_request(container_attrs["cpu"])
+        if "cpu_limit" in container_attrs:
+            container_op.container.set_cpu_limit(container_attrs["cpu_limit"])
+        if "gpu" in container_attrs:
             # TODO(yunw)(AIP-2048): Support mixture of GPU from different vendors.
-            gpu_vendor = pod_spec.get("gpu_vendor", None)
+            gpu_vendor = container_attrs.get("gpu_vendor", None)
             container_op.container.set_gpu_limit(
-                pod_spec["gpu"],
+                container_attrs["gpu"],
                 vendor=gpu_vendor if gpu_vendor else "nvidia",
             )
-        if "annotations" in pod_spec:
-            for name, value in pod_spec["annotations"].items():
+        if "annotations" in container_attrs:
+            for name, value in container_attrs["annotations"].items():
                 container_op.add_pod_annotation(name, value)
-        if "labels" in pod_spec:
-            for name, value in pod_spec["labels"].items():
+        if "labels" in container_attrs:
+            for name, value in container_attrs["labels"].items():
                 container_op.add_pod_label(name, value)
 
     def step_op(
